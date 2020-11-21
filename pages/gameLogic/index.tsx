@@ -1,84 +1,11 @@
-import {combineReducers, configureStore, createSlice, PayloadAction} from "@reduxjs/toolkit"
-
-const entitySliceInitialState = {
-  allIds: [],
-  byId: {},
-}
-
-function entitySliceFactory <T extends {id:string}>(name: string, initialState: {allIds: string[], byId: {[key:string]: T}} = entitySliceInitialState) {
-  return createSlice({
-    name,
-    initialState,
-    reducers: {
-      addBatch: (state, action: PayloadAction<T[]>) => {
-        return {
-          allIds: [...state.allIds, ...action.payload.map(ent => ent.id)],
-          byId: {
-            ...state.byId,
-            ...action.payload.reduce((sum: {[key:string]: T}, cur) => {
-              sum[cur.id] = cur
-              return sum
-            }, {})
-          }
-        }
-      },
-      add: (state, action: PayloadAction<T>) => {
-        return {
-          allIds: [...state.allIds, action.payload.id],
-          byId: {
-            ...state.byId,
-            [action.payload.id]: action.payload,
-          }
-        }
-      },
-      remove: (state, action: PayloadAction<string>) => {
-        const key = action.payload
-        const {[key]: value, ...rest} = state.byId
-        return {
-          allIds: state.allIds.filter(id => action.payload !== id),
-          byId: rest,
-        }
-      },
-      update: (state, action: PayloadAction<T>) => {
-        return {
-          allIds: state.allIds,
-          byId: {
-            ...state.byId,
-            [action.payload.id]: action.payload,
-          }
-        }
-      },
-      reset: () => {
-        return initialState
-      }
-    }
-  })
-}
-
-
-const scenarioPropsSlice = entitySliceFactory("scenarioProps")
-const scenarioPropsLeftSlice = entitySliceFactory("scenarioPropsLeft")
-const activeScenarioPropsSlice = entitySliceFactory("activeScenarioProps")
-
-const rootReducer = combineReducers({
-  scenarioProps: scenarioPropsSlice.reducer,
-  scenarioPropsLeft: scenarioPropsLeftSlice.reducer,
-  activeScenarioProps: activeScenarioPropsSlice.reducer,
-})
-
-export const store = configureStore({
-  reducer: rootReducer,
-})
+import {activeScenarioPropsSlice, playersSlice, scenarioPropsLeftSlice, scenarioPropsSlice, store} from "../../store"
+import {v4} from "uuid"
 
 export class GameLogic {
   SHEET_ID = '1DH88qZDu8wYytSK4CDT4XYfSMFUfjGfwPQ65luaUUlM'
   ACCESS_TOKEN = 'AIzaSyDYWsYcyYdhU7LgQZIHUJlpla0yV8BBfis'
 
   store = store
-
-  // scenarioProps = []
-  // scenarioPropsLeft = []
-  // activeScenarioProps = []
 
   requestScenarioProps = async () => {
     const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${this.SHEET_ID}/values/A1:H30?key=${this.ACCESS_TOKEN}`)
@@ -109,6 +36,15 @@ export class GameLogic {
   removeActiveScenarioProps = async (scenarioProp) => {
     this.store.dispatch(scenarioPropsLeftSlice.actions.add(scenarioProp))
     this.store.dispatch(activeScenarioPropsSlice.actions.remove(scenarioProp.id))
+  }
+
+  addPlayer = () => {
+    this.store.dispatch(playersSlice.actions.add({id: v4(), name: ""}))
+  }
+
+  updatePlayersName = (id: string, name: string) => {
+    const player = this.store.getState().players.byId[id]
+    this.store.dispatch(playersSlice.actions.update({ ...player, name}))
   }
 }
 
