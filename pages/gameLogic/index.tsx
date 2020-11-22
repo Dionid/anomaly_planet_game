@@ -91,6 +91,19 @@ export class GameLogic {
     this.store.dispatch(playersSlice.actions.update({ ...newLeaderPlayer, isLeader: true }))
     if (oldLeaderPlayer) this.store.dispatch(playersSlice.actions.update({ ...oldLeaderPlayer, isLeader: false }))
   }
+
+  setRandomLeader = () => {
+    const playersStore = this.store.getState().players
+    if (playersStore.allIds.length === 0) return
+    const randNum = Math.floor(Math.random() * playersStore.allIds.length)
+    const randLeaderId = playersStore.allIds[randNum]
+    // If already leader, than try again
+    if (playersStore.byId[randLeaderId].isLeader) {
+      this.setRandomLeader()
+    } else {
+      this.setNewLeader(randLeaderId)
+    }
+  }
 }
 
 export const gameLogicInstance = new GameLogic(store, new GoogleSheetRepo())

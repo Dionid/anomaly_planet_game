@@ -63,7 +63,14 @@ const PlayersList = (props) => {
   return (
     <Paper style={{padding: 15}} elevation={0}>
       <h2>Players</h2>
-      <Button onClick={gameLogicInstance.addPlayer} variant="contained" color="primary">Add player</Button>
+      <Grid container spacing={3}>
+        <Grid item>
+          <Button onClick={gameLogicInstance.addPlayer} variant="contained" color="primary">Add player</Button>
+        </Grid>
+        <Grid item>
+          <Button onClick={gameLogicInstance.setRandomLeader} variant="contained" color="primary">Set random Leader</Button>
+        </Grid>
+      </Grid>
       <Grid container style={{paddingTop: 30}} spacing={3}>
           {
             props.allIds.map((id) => props.byId[id]).map((player) => {
