@@ -1,13 +1,12 @@
-import {activeScenarioPropsSlice, playersSlice, scenarioPropsLeftSlice, scenarioPropsSlice, store} from "../../store"
-import {v4} from "uuid"
+import {activeScenarioPropsSlice, playersSlice, scenarioPropsLeftSlice, originScenarioPropsSlice, store} from "../../store"
+import {PlayerModelService} from "./playerModel"
+import {EnhancedStore} from "@reduxjs/toolkit"
 
-export class GameLogic {
+export class GoogleSheetRepo {
   SHEET_ID = '1DH88qZDu8wYytSK4CDT4XYfSMFUfjGfwPQ65luaUUlM'
   ACCESS_TOKEN = 'AIzaSyDYWsYcyYdhU7LgQZIHUJlpla0yV8BBfis'
 
-  store = store
-
-  requestScenarioProps = async () => {
+  public async getScenarioPropsData(): Promise<any> {
     const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${this.SHEET_ID}/values/A1:H30?key=${this.ACCESS_TOKEN}`)
     const resData = await res.json()
     const names = resData.values.shift()
@@ -19,9 +18,30 @@ export class GameLogic {
       sum.push(obj)
       return sum
     }, [])
-    scenarioPropsSlice.actions
-    this.store.dispatch(scenarioPropsSlice.actions.addBatch(result))
-    this.store.dispatch(scenarioPropsLeftSlice.actions.addBatch(result))
+    return result
+  }
+}
+
+export interface GameLogicRepo {
+  getScenarioPropsData: any
+}
+
+export class GameLogic {
+  constructor(
+    private store: EnhancedStore,
+    private repo: GameLogicRepo,
+  ) {
+
+  }
+
+  initGame = async () => {
+    this.requestScenarioProps()
+  }
+
+  requestScenarioProps = async () => {
+    const scenarioPropsData = await this.repo.getScenarioPropsData()
+    this.store.dispatch(originScenarioPropsSlice.actions.addBatch(scenarioPropsData))
+    this.store.dispatch(scenarioPropsLeftSlice.actions.addBatch(scenarioPropsData))
   }
 
   addActiveScenarioProps = async () => {
@@ -33,19 +53,34 @@ export class GameLogic {
     this.store.dispatch(scenarioPropsLeftSlice.actions.remove(activeProp.id))
   }
 
-  removeActiveScenarioProps = async (scenarioProp) => {
+  removeActiveScenarioProps = async (scenarioPropId: string) => {
+    const scenarioProp = this.store.getState().originScenarioProps.byId[scenarioPropId]
     this.store.dispatch(scenarioPropsLeftSlice.actions.add(scenarioProp))
-    this.store.dispatch(activeScenarioPropsSlice.actions.remove(scenarioProp.id))
+    this.store.dispatch(activeScenarioPropsSlice.actions.remove(scenarioPropId))
   }
 
   addPlayer = () => {
-    this.store.dispatch(playersSlice.actions.add({id: v4(), name: ""}))
+    this.store.dispatch(playersSlice.actions.add(PlayerModelService.createPlayer()))
+  }
+
+  removePlayer = (id: string) => {
+    this.store.dispatch(playersSlice.actions.remove(id))
   }
 
   updatePlayersName = (id: string, name: string) => {
     const player = this.store.getState().players.byId[id]
-    this.store.dispatch(playersSlice.actions.update({ ...player, name}))
+    this.store.dispatch(playersSlice.actions.update({ ...player, name }))
+  }
+
+  addPositiveBuffToPlayer = (id: string) => {
+    const player = this.store.getState().players.byId[id]
+    this.store.dispatch(playersSlice.actions.update({
+      ...player,
+      buffs: [
+        // Here will be new random buff
+      ]
+    }))
   }
 }
 
-export const gameLogicInstance = new GameLogic()
+export const gameLogicInstance = new GameLogic(store, new GoogleSheetRepo())

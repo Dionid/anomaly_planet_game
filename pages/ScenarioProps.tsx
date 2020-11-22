@@ -16,7 +16,7 @@ const ScenarioProps = (props) => {
     gameLogicInstance.removeActiveScenarioProps(prop)
   }
 
-  return <Paper style={{padding: 15}} elevation={3}>
+  return <Paper style={{padding: 15}} elevation={0}>
     <h2>Свойства сценария</h2>
     <Button onClick={addProp} variant="contained" color="primary">Добавить свойства</Button>
     <Grid container spacing={3} style={{paddingTop: 30}}>
@@ -26,7 +26,7 @@ const ScenarioProps = (props) => {
             <Paper style={{padding: 15}} elevation={3}>
               <h3>{scenarioProp.name}</h3>
               <p>{scenarioProp.description}</p>
-              <Button color={"default"} variant="contained" onClick={() => removeProp(scenarioProp)}>Убрать</Button>
+              <Button color={"default"} variant="contained" onClick={() => removeProp(scenarioProp.id)}>Remove</Button>
             </Paper>
           </Grid>
         })
