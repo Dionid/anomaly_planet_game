@@ -10,8 +10,8 @@ interface PlayerModel {
 
 export class PlayerModelService {
   static createPlayer(
-    name: string = "",
     isLeader: boolean = false,
+    name: string = "",
     buffs: any[] = [],
     debuffs: any[] = [],
     id: string = v4(),

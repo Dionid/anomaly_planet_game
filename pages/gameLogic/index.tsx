@@ -81,6 +81,16 @@ export class GameLogic {
       ]
     }))
   }
+
+  setNewLeader = (playerId: string) => {
+    const playersStore = this.store.getState().players
+    const newLeaderPlayer = playersStore.byId[playerId]
+    const oldLeaderPlayer = Object.values(playersStore.byId).filter(player => {
+      return player.isLeader
+    })[0]
+    this.store.dispatch(playersSlice.actions.update({ ...newLeaderPlayer, isLeader: true }))
+    if (oldLeaderPlayer) this.store.dispatch(playersSlice.actions.update({ ...oldLeaderPlayer, isLeader: false }))
+  }
 }
 
 export const gameLogicInstance = new GameLogic(store, new GoogleSheetRepo())

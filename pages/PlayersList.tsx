@@ -71,15 +71,15 @@ const PlayersList = (props) => {
                 gameLogicInstance.updatePlayersName(player.id, event.target.value)
               }
               return (
-                <Grid item xs={12}>
+                <Grid item xs={12} key={player.id}>
                   <Paper style={{padding: 15}}>
                     <FormGroup row>
                       <TextField id="outlined-basic" label="Name" variant="outlined" onChange={onChange} value={player.name} style={{width: "100%"}}/>
                       <FormControlLabel
                         control={
                           <Switch
-                            // checked={state.checkedB}
-                            // onChange={handleChange}
+                            checked={player.isLeader}
+                            onChange={() => gameLogicInstance.setNewLeader(player.id)}
                             name="checkedB"
                             color="primary"
                           />
