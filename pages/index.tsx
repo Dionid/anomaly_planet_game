@@ -9,11 +9,11 @@ export default function Home() {
     <Provider store={store}>
       <Container>
         <Grid container style={{paddingTop: 75}} spacing={3}>
-          <Grid item xs={12}>
-            <ScenarioProps/>
-          </Grid>
           <Grid item xs={12} style={{paddingTop: 30}}>
             <PlayersList/>
+          </Grid>
+          <Grid item xs={12}>
+            <ScenarioProps/>
           </Grid>
         </Grid>
       </Container>

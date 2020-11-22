@@ -58,12 +58,57 @@ export const TypeOfPropButton: FunctionComponent<TypeOfPropButtonProps> = (props
   )
 }
 
+interface JobsSelectMenuProps {
+  onSelected: (p: string) => void
+}
+
+const JobsSelectMenu: FunctionComponent<JobsSelectMenuProps> = (props) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleMenuItemClick = (type: string) => {
+    props.onSelected(type);
+    handleClose();
+  }
+
+  return (
+    <Fragment>
+      <Button color={"default"} variant="contained" aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
+        Add job
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => handleMenuItemClick("")}>Разведка</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick("")}>Приготовить еду</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick("")}>Выгребная яма</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick("")}>Костер</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick("")}>Охота</MenuItem>
+        <MenuItem onClick={() => handleMenuItemClick("")}>Микстура</MenuItem>
+      </Menu>
+    </Fragment>
+  )
+}
+
 
 const PlayersList = (props) => {
   return (
     <Paper style={{padding: 15}} elevation={0}>
-      <h2>Players</h2>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} alignItems={"center"}>
+        <Grid item>
+          <h2>Players</h2>
+        </Grid>
         <Grid item>
           <Button onClick={gameLogicInstance.addPlayer} variant="contained" color="primary">Add player</Button>
         </Grid>
@@ -71,7 +116,7 @@ const PlayersList = (props) => {
           <Button onClick={gameLogicInstance.setRandomLeader} variant="contained" color="primary">Set random Leader</Button>
         </Grid>
       </Grid>
-      <Grid container style={{paddingTop: 30}} spacing={3}>
+      <Grid container spacing={3}>
           {
             props.allIds.map((id) => props.byId[id]).map((player) => {
               const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +126,10 @@ const PlayersList = (props) => {
                 <Grid item xs={12} key={player.id}>
                   <Paper style={{padding: 15}}>
                     <FormGroup row>
-                      <TextField id="outlined-basic" label="Name" variant="outlined" onChange={onChange} value={player.name} style={{width: "100%"}}/>
+                      <TextField id="outlined-basic" label="Name" variant="outlined" onChange={onChange} value={player.name}/>
+                    </FormGroup>
+                    <h4>Props</h4>
+                    <FormGroup row>
                       <FormControlLabel
                         control={
                           <Switch
@@ -93,14 +141,35 @@ const PlayersList = (props) => {
                         }
                         label="Is leader"
                       />
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={player.isDead}
+                            onChange={() => {}}
+                            name="checkedB"
+                            color="primary"
+                          />
+                        }
+                        label="Is dead"
+                      />
+                      <p>Food need: {player.foodNeed}</p>
                     </FormGroup>
-                    <Grid container style={{marginTop: 15}}>
+                    <Grid container style={{marginTop: 15}} spacing={3}>
+                      <Grid item>
+                        <JobsSelectMenu onSelected={ () => {} }/>
+                      </Grid>
+                    </Grid>
+                    <Grid container style={{marginTop: 15}} spacing={3}>
                       <Grid item>
                         <TypeOfPropButton onSelected={ () => {} } text={"Add buff"}/>
-                        <TypeOfPropButton onSelected={ () => {} } text={"Add debuff"}/>
                       </Grid>
                       <Grid item>
-                        <Button color={"default"} variant="contained" onClick={() => gameLogicInstance.removePlayer(player.id)}>Remove</Button>
+                        <TypeOfPropButton onSelected={ () => {} } text={"Add debuff"}/>
+                      </Grid>
+                    </Grid>
+                    <Grid container style={{marginTop: 15}} spacing={3}>
+                      <Grid item>
+                        <Button color={"secondary"} variant="contained" onClick={() => gameLogicInstance.removePlayer(player.id)}>Remove</Button>
                       </Grid>
                     </Grid>
                   </Paper>
